@@ -1,0 +1,11 @@
+variable "project_name" {}
+variable "eks_cluster_version" {}
+variable "eks_worker_ami_id" {}
+variable "eks_worker_instance_type" {}
+variable "rds_instance_class" {}
+variable "rds_allocated_storage" {}
+variable "rds_db_name" {}
+variable "rds_username" {}
+variable "rds_password" {}
+variable "route53_hosted_zone" {}
+variable "static_website_domain_name" {}

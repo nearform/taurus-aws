@@ -1,0 +1,14 @@
+project_name = "taurus"
+
+eks_cluster_version      = "1.14"
+eks_worker_ami_id        = "ami-0497f6feb9d494baf" # https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html
+eks_worker_instance_type = "t3.medium"
+
+rds_instance_class    = "db.t2.micro"
+rds_allocated_storage = 5
+rds_db_name           = "taurus"
+rds_username          = "postgres"
+# rds_password = ""
+
+route53_hosted_zone        = "nearform.com."
+static_website_domain_name = "taurus-webapp.nearform.com"

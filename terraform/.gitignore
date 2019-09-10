@@ -1,0 +1,6 @@
+.terraform
+terraform.tfstate*
+backend.tfvars
+kubeconfig*
+config-map-aws*
+*.auto.tfvars
