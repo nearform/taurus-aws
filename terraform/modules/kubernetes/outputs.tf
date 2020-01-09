@@ -21,3 +21,7 @@ output "cluster_autoscaler_iam_role_arn" {
 output "fluentd_cloudwatch_iam_role_arn" {
   value = "${aws_iam_role.fluentd_cloudwatch.arn}"
 }
+
+output "eks_admin_iam_role_arm" {
+  value = aws_iam_role.eks_admin_access.arn
+}

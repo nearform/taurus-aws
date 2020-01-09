@@ -23,6 +23,13 @@ module "eks" {
   ]
 
   map_users = var.eks_map_users
+  map_roles = concat(var.eks_map_roles, [
+    {
+      role_arn  = aws_iam_role.eks_admin_access.arn
+      username  = aws_iam_role.eks_admin_access.name
+      group     = "system:masters"
+    }
+  ])
 
   tags = var.tags
 }

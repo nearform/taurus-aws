@@ -14,6 +14,15 @@ variable "eks_map_users" {
   type    = "list"
   default = []
 }
+variable "eks_map_roles" {
+  description = "Additional IAM roles to add to the aws-auth configmap."
+  type = list(object({
+    role_arn  = string
+    username = string
+    group   = list(string)
+  }))
+  default = []
+}
 variable "tags" {
   default = {}
 }
