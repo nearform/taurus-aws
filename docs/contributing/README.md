@@ -1,49 +1,49 @@
-# Contributing
+# Contribute to Taurus
 
 ## Code
-To follow...
+To follow.
 
 ## Documentation
-We welcome documentation contributions. Our documentation can be viewed live at [nearform.github.io/taurus][docs]
+We welcome documentation contributions. You can view our documentation at [nearform.github.io/taurus][docs]
 
-### Running Documentation locally
-Our documentation can be ran by serving the docs folder at a given port. For ease of use you can use the `docsfiy-cli` should you have node installed.
-
+### Run the Documentation Locally
+You can run our documentation by serving the `docs` folder at a given port. If you have node installed you can use the `docsfiy-cli`.
+To install node, use a command console to enter the following command:
 ```sh
-npm install  -g docsify-cli
+npm install -g docsify-cli
 ```
 
-Next, in the root folder, run the cli, and thus the docs,
+From the root folder on a command console, enter the command:
 
 ```sh
 docsify serve docs
 ```
 
-Which will produce,
+This displays the following:
 
 ```sh
 Serving /path/to/your/repo/taurus/docs now.
 Listening at http://localhost:3000
 ```
 
-The documentation will be served on `localhost:3000`.
+The documentation is served on `localhost:3000`.
 
-#### Serving in other ways
-Our documentation builds on the fly. This means all you need to do is serve the docs folder. Any program or cli tool used for serving a folder will work; __as long as it can handle hash routing__.
+#### Serve in Other Ways
+Our documentation builds on the fly. This means all you need to do is serve the `docs` folder. Any program or CLI tool used for serving a folder works - __as long as it can handle hash routing__.
 
-Another popular module for serving files is `serve` on npm. This can be installed via
-
-```sh
-npm install  -g docsify-cli
-```
-
-and ran, with hash router support like so,
+Another module to serve files is `serve` on npm. To install node, use a command console to enter the following command:
 
 ```sh
-serve -s -l 4000 docs
+npm install -g docsify-cli
 ```
 
-Which will produce,
+From the root folder on a command console, enter the following command (with hash router support):
+
+```sh
+npx serve -s -l 4000 docs
+```
+
+This displays the following:
 
 ```
  ┌──────────────────────────────────────────────────┐
@@ -58,6 +58,6 @@ Which will produce,
  └──────────────────────────────────────────────────┘
 ```
 
-The documentation will be served on `localhost:4000` in this case.
+The documentation is served on `localhost:4000` in this case.
 
 [docs]:https://nearform.github.io/taurus

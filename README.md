@@ -1,8 +1,8 @@
 [![Logo][logo-img]][docs]
 
-Deploy to AWS with ease using __N__ earForm __O__ pinionated __I__ nfrastructure __S__ tack for __E__ nterprise.
+Deploy your web application to AWS with ease using __Taurus__.
 
-- Get the whole picture by viewing our __[Documentation][docs]__
+View our __[Documentation][docs]__ for more details.
 
 [logo-img]: docs/img/Accel_Logo_Taurus.svg
 [docs]: https://nearform.github.io/taurus

@@ -1,93 +1,116 @@
 # ![Logo][logo-img]
 
-Deploy to AWS with ease using __N__ earForm __O__ pinionated __I__ nfrastructure __S__ tack for __E__ nterprise.
+Deploy your web application to AWS with ease using __Taurus__.
 
-# What is Taurus
-Taurus is Terraform infrastructure stack, a boilerplate for any web application.
+# Taurus Overview
+Taurus is a Terraform infrastructure stack, a boilerplate for any web application.
 
-## High level architecture
+Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage  low-level infrastructure components such as compute instances, storage, and networking, as well as high-level components such as DNS entries, Software as a Service (SaaS) features and so on.
+
+## High-Level Architecture
+The diagram below displays Taurus high-level architecture. The backend consists of a Virtual Private Cloud (VPC) containing an Application Load Balancer (ALB) and Amazon Elastic Kubernetes Service (EKS). The frontend consists of CloudFront and Amazon Simple Storage Service (S3).
+
 ![High level architecture][high-level-architecture]
+Fig.1 Taurus High-Level Architecture
 
-# Explore Taurus
-Taurus solves two different problems:
-- AWS services provisioning
-- Installation of Kubernetes addons
+Taurus provides you with the following capabilities:
+- Provision Amazon Web Services (AWS).
+- Install Kubernetes add-ons.
 
-## AWS Services
-Taurus focuses on main infrastructure compoments and is exptected to be extended. Thus it's called boilerplate.
+## AWS Provisioning
+Taurus focuses on the main infrastructure components and we expect you will extend it. That's why it's called a boilerplate.
 
-The main components are:
+The main Taurus components are:
 - Networking (VPC)
-- Kubernetes (EKS + addons IAM roles)
-- Database (RDS)
-- Static website (S3 + Cloudfront + SSL)
+- Kubernetes (EKS, add-ons, and Identity and Access Management (IAM) roles)
+- Database (Amazon Relational Database Service (RDS))
+- Static website (S3, CloudFront and Secure Sockets Layer(SSL))
 
-## Kubernetes addons
-Same as with infrastructure Taurus focuses only on main and necessary Kubernetes addons. 
+## Kubernetes Add-Ons
+As with infrastructure, Taurus focuses on the necessary Kubernetes add-ons. You need to install the following Kubernetes add-ons:
+- Helm
+- Kube2iam
+- Fluentd CloudWatch
+- Cluster Autoscaler
+- Metrics server
+- ALB Ingress controller
+- ExternalDNS
 
-### Helm Tiller
+Each add-on is described in more detail below. Details on how to install these add-ons are available in the following section [Install Kubernetes Add-Ons].
 
-There are two parts to Helm: The Helm client (helm) and the Helm server (Tiller).
+### Helm 
+Helm is a tool that streamlines installing and managing Kubernetes applications. Helm consists of the Helm client (helm) and the Helm server (Tiller).
 
-The tiller is a necessary resource to be able to use helm client and provision applications this manner.
-This is what enables us to deploy application from CI in a programmatic way.
-And therefore for this setup is a required piece to the puzzle.
+The Tiller is a necessary resource to use the helm client and provision applications. It enables you to deploy an application from Continuous Integration (CI) in a programmatic way.
 
-For setting up new helmcharts and using the tiller properly there is a best practices that can be found here: [Helm best practices](https://docs.helm.sh/chart_best_practices/)
+To create new Helm charts and configure Tiller correctly, refer to [The Chart Best Practices Guide](https://docs.helm.sh/chart_best_practices/).
 
-Documentation for developing helm charts from start to finish can be found here: [Intro to helm charts](https://docs.helm.sh/chart_template_guide/#the-chart-template-developer-s-guide)
+For more information on Helm charts, refer to [The Chart Template Developer's Guide](https://docs.helm.sh/chart_template_guide/#the-chart-template-developer-s-guide).
 
 ### Kube2iam
 
-Provide IAM credentials to containers running inside a kubernetes cluster based on annotations.
+Kube2iam provides IAM credentials to containers running inside a Kubernetes cluster based on annotations.
 
-Context
-Traditionally in AWS, service level isolation is done using IAM roles. IAM roles are attributed through instance profiles and are accessible by services through the transparent usage by the aws-sdk of the ec2 metadata API. When using the aws-sdk, a call is made to the EC2 metadata API which provides temporary credentials that are then used to make calls to the AWS service.
+Kube2iam works by intercepting traffic from the containers to the Amazon Elastic Compute Cloud (EC2) Metadata API. It calls the AWS Security Token Service (STS) API to obtain temporary credentials using the pod configured role. Then using these temporary credentials it performs the original request. The container needs to run with host networking enabled so that it can call the EC2 metadata API itself.
 
-Problem statement
-The problem is that in a multi-tenanted containers based world, multiple containers will be sharing the underlying nodes. Given containers will share the same underlying nodes, providing access to AWS resources via IAM roles would mean that one needs to create an IAM role which is a union of all IAM roles. This is not acceptable from a security perspective.
+For more information and usage refer to [kube2iam] on GitHub.
 
-Solution
-The solution is to redirect the traffic that is going to the ec2 metadata API for docker containers to a container running on each instance, make a call to the AWS API to retrieve temporary credentials and return these to the caller. Other calls will be proxied to the EC2 metadata API. This container will need to run with host networking enabled so that it can call the EC2 metadata API itself.
+### Fluentd CloudWatch
 
-For more information and usage see here: [github.com/jtblin/kube2iam](https://github.com/jtblin/kube2iam)
+Fluentd is an open source data collector for a unified logging layer. It allows you to unify data collection and consumption for a better use and understanding of data. Once installed on a server, it runs in the background to collect, parse, transform, analyse and store various types of data.
 
+Fluentd sends all the Kubernetes or EKS logs to CloudWatch logs to have a centralised and unified view of all the logs from the cluster, both from the nodes and from each container.
 
-### Fluentd-cloudwatch
+To learn more about fluentd and its capabilities, refer to the [Fluentd Quick Start Documentation].
 
-Is an open source data collector for unified logging layer.
-Fluentd allows you to unify data collection and consumption for a better use and understanding of data.
+### Metrics Server
 
-To learn more about fluentd and its capabilites visit: [docs.fluentd.org](https://docs.fluentd.org/v1.0/articles/quickstart)
+The metrics server enables cluster-wide metrics collection from Kubernetes resources, for example, container CPU and memory usage. You also need the metrics server to enable Horizontal Pod Autoscaling (HPA).
 
+For more information, refer to [Kubernetes Metrics Server] on GitHub.
 
+Note: Metrics server replaces the deprecated Heapster metrics collector.
+
+### Cluster Autoscaler
+
+Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster if either of the following conditions occur in the cluster:
+- Pods fail to run due to insufficient resources.
+- Nodes are underutilised for an extended time and their pods can be placed on other existing nodes.
+
+For more information, refer to [Kubernetes Autoscaler] on GitHub. 
+
+### ALB Ingress Controller
+An Ingress is configured to give services externally-reachable URLs, load balance traffic, terminate SSL or Transport Layer Security (TLS), and offer name-based virtual hosting. The Ingress controller is responsible for fulfilling the Kubernetes Ingress by provisioning an application load balancer.
+
+For more information, refer to [AWS ALB Ingress controller] on GitHub.
+
+### ExternalDNS
+
+ExternalDNS auto-synchronises exposed Kubernetes Services and Ingresses with DNS providers.
+
+ExternalDNS is not a DNS server itself, but instead configures other DNS providers, for example, AWS Route 53. It allows you to control DNS records dynamically via Kubernetes resources in a DNS provider-agnostic way.
+
+For more information refer to [Kubernetes ExternalDNS] on GitHub.
+
+# Explore Taurus
+The quickest way to explore Taurus is to view our Quick Start Guide. It covers cloning and pulling Taurus locally. It describes the prerequisites, AWS provisioning and how to install Kubernetes add-ons.
+
+- Go to the [Quick Start Guide].
+
+<!-- Internal Links -->
 [logo-img]: img/Accel_Logo_Taurus.svg
 [high-level-architecture]: img/high-level-architecture.jpg
+[Install Kubernetes Add-Ons]:/helm/
+[Quick Start Guide]:/quick-start/
 
-### Metrics-server
 
-Enables collecting of metrics from Kubernetes resources. Metrics-server is a replacement for deprecated `Heapster` metrics collector.
+<!-- External Links -->
+[kube2iam]: https://github.com/jtblin/kube2iam
+[Fluentd Quick Start Documentation]:https://docs.fluentd.org/v1.0/articles/quickstart
+[Kubernetes Metrics Server]:https://github.com/kubernetes-sigs/metrics-server
 
-Metrics-server is required for enabling Horizontal Pod Autoscaling (HPA).
+[Kubernetes Autoscaler]:https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 
-To learn more visit: [kubernetes-incubator/metrics-server](https://github.com/kubernetes-incubator/metrics-server)
+[AWS ALB Ingress controller]:https://github.com/kubernetes-sigs/aws-alb-ingress-controller
 
-### Cluster-autoscaler
-
-Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster when one of the following conditions is true:
-- there are pods that failed to run in the cluster due to insufficient resources
-- there are nodes in the cluster that have been underutilized for an extended period of time and their pods can be placed on other existing nodes
-
-To learn more visit: [kubernetes/autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
-
-### ALB-ingress-controller
-
-The AWS ALB Ingress Controller satisfies Kubernetes ingress resources by provisioning Application Load Balancers.
-
-To learn more visit: [kubernetes-sigs/aws-alb-ingress-controller](https://github.com/kubernetes-sigs/aws-alb-ingress-controller)
-
-### External-dns
-
-ExternalDNS auto-synchronizes exposed Kubernetes Services and Ingresses with DNS providers (AWS Route53).
-
-To learn more visit [kubernetes-incubator/external-dns](https://github.com/kubernetes-incubator/external-dns)
+[Kubernetes ExternalDNS]: https://github.com/kubernetes-incubator/external-dns

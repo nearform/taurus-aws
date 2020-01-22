@@ -1,85 +1,109 @@
-# Quick Start
+# Taurus Quick Start Guide
 
-## Install dependencies
-1. Install [aws][aws-cli-install] CLI
-2. Install [aws-iam-authenticator][aws-iam-authenticator-install]
-3. Install [kubectl][kubectl-install]
-4. Install [helm][helm-install] 
-  * Once helm is installed execute: `helm init --client-only`
-4. Install [terraform][terraform-install] client version: >= 0.12.8
+This section describes how to get started with Taurus. It outlines the following:
+ - Taurus dependencies you need to install. 
+ - How to clone the Taurus repository. 
+ - AWS prerequisites you require.
+ - Details on how to provision Terraform.
 
-## AWS prerequisites
+## Install Dependencies
+Install the following Taurus dependencies using the instructions in each provided link:
 
-### Terraform IAM user
-1. Create an access keys of a user with right permissions for provisioning this list of components:
-  * VPC (with subnets, etc...)
-  * EKS cluster
-  * RDS (PostgreSQL DB)
-  * S3 bucket for serving static content
-  * Cloudfront CDN for S3 bucket
-3. Create an AWS profile that makes use of access key created in previous step by running command:
-  ```sh
-  $ aws configure --profile taurus
-  ```
+1. [AWS][aws-cli-install] CLI
+1. [aws-iam-authenticator][aws-iam-authenticator-install]
+1. [kubectl][kubectl-install]
+1. [Helm][helm-install] 
+    
+    After installing Helm, run the command: 
+    
+    `helm init --client-only`
+1. [Terraform][terraform-install]. Use version 0.12.8 or higher.
+
+## Clone the Source Repository
+To start, fork [Taurus] on GitHub. It is easier to maintain your own fork as Taurus is designed to diverge. It is unlikely you will need to pull from the source repository again.
+
+Once you have your fork, clone a copy of it locally:
+
+```sh
+git clone https://github.com/<your-fork>/taurus.git
+```
+
+## AWS Prerequisites
+
+Amazon Web Services(AWS) requires:
+- A Terraform IAM user with access keys and an AWS profile.
+- A Terraform S3 bucket.
+
+This section describes how to create both of these.
+
+### Create a Terraform IAM User
+1. Create an access key for a user with right permissions for provisioning this list of components:
+    * VPC (with subnets and so on)
+    * EKS cluster
+    * RDS (PostgreSQL DB)
+    * S3 bucket to serve static content
+    * CloudFront Content Delivery Network (CDN) for the S3 bucket
+
+1. Create an AWS profile that uses the access key created in the previous step by running command:
+    ```sh
+    $ aws configure --profile taurus
+    ```
   
-  Output will guide you thru it like this
-  ```sh
-  AWS Access Key ID [None]: AK*********E
-  AWS Secret Access Key [None]: je7M***************EY
-  Default region name [None]: eu-west-1
-  Default output format [None]: text
-  ```
+    The output guides you through the profile setup as follows:
+    ```sh
+    AWS Access Key ID [None]: AK*********E
+    AWS Secret Access Key [None]: je7M***************EY
+    Default region name [None]: eu-west-1
+    Default output format [None]: text
+    ```
 
-4. Set AWS CLI to use `taurus` AWS profile by setting this environment variable:
-  ```sh
-  export AWS_PROFILE=taurus
-  ```
+1. Set the AWS CLI to use the taurus AWS profile using the `AWS_PROFILE` environment variable as follows:
+    ```sh
+    export AWS_PROFILE=taurus
+    ```
 
-[kubectl-install]: https://kubernetes.io/docs/tasks/tools/install-kubectl
-[aws-iam-authenticator-install]: https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
-[helm-install]: https://github.com/helm/helm/releases/tag/v2.9.0
-[terraform-install]: https://www.terraform.io/downloads.html
-[aws-cli-install]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
+### Create a Terraform State S3 Bucket
+1. Create a S3 Bucket using the following command:
+    ```sh
+    aws s3api create-bucket \
+    --bucket taurus-terraform-state \
+    --region eu-west-1 \
+    --create-bucket-configuration LocationConstraint=eu-west-1
+    ```
+1. Enable versioning on the bucket using the following command:
+    ```sh
+    aws s3api put-bucket-versioning \
+    --bucket taurus-terraform-state \
+    --versioning-configuration Status=Enabled
+    ```
 
-### Terraform state S3 bucket
-1. Create a S3 Bucket:
-```sh
-aws s3api create-bucket \
---bucket taurus-terraform-state \
---region eu-west-1 \
---create-bucket-configuration LocationConstraint=eu-west-1
-```
-2. Enable versioning on the bucket:
-```sh
-aws s3api put-bucket-versioning \
---bucket taurus-terraform-state \
---versioning-configuration Status=Enabled
-```
+## Provision Terraform
+1. Rename and and edit the Terraform backend storage configuration file from `backend.tfvars.sample` to `backend.tfvars`.
+1. Rename and edit the Terraform project configuration file from  `config.tfvars.sample` to `development.tfvars`.
+1. Initialise Terraform using the command:
+    ```sh
+    terraform init -backend-config=backend.tfvars
+    ```
+1. Create and switch to the right workspace (environment):
+    ```sh
+    terraform workspace new development
+    ```
+1. Provision the infrastructure:
+    ```sh
+    terraform apply -var-file="development.tfvars"
+    ```
+1. When the Kubernetes cluster exists, fetch and update the `~/.kube/config` file.
+    ```sh
+    aws eks update-kubeconfig --name <eks_cluster_name>
+    ```
+1. Install Kubernetes add-ons.
+See the [Install Kubernetes Add-Ons] section of this document for more details. 
 
-## Provisioning
-1. Rename and adjust `backend.tfvars.sample` to `backend.tfvars` (terraform backend storage configuration)
-2. Rename and adjust `config.tfvars.sample` to `development.tfvars` (terraform project configuration)
-3. Init Terraform:
-```sh
-terraform init -backend-config=backend.tfvars
-```
-4. Create and switch to right workspace (environment):
-```sh
-terraform workspace new development
-```
-5. Provision the infrastructure:
-```sh
-terraform apply -var-file="development.tfvars"
-```
-6. Once the Kubernetes cluster exists you can fetch & update your `~/.kube/config`.
-```sh
-aws eks update-kubeconfig --name <eks_cluster_name>
-```
-7. Install Kubernetes addons [Step by Step guide](/helm/)
+## Create Users with Access to Kubernetes
+Only the AWS IAM user who provisioned the stack has access to the Kubernetes cluster.
 
-## Access to Kubernetes
-Only AWS IAM user who provisioned the stack has access to Kubernetes cluster.
-New users can be added by setting up `eks_map_users` optional variable in `kubernetes` Terraform module.
+To add a new user, use the `eks_map_users` optional variable in the Kubernetes Terraform module. For example:
+
 ```hcl
 eks_map_users = [
   {
@@ -89,4 +113,17 @@ eks_map_users = [
   }
 ]
 ```
-More info: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
+
+For more information on adding users, refer to [Managing Users or IAM Roles for your Cluster].
+
+<!-- Internal Links -->
+[Install Kubernetes Add-Ons]:/helm/
+
+<!-- External Links -->
+[aws-cli-install]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
+[aws-iam-authenticator-install]: https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
+[kubectl-install]: https://kubernetes.io/docs/tasks/tools/install-kubectl
+[helm-install]: https://github.com/helm/helm/releases/tag/v2.9.0
+[terraform-install]: https://www.terraform.io/downloads.html
+[Managing Users or IAM Roles for your Cluster]: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
+[Taurus]: https://github.com/nearform/taurus

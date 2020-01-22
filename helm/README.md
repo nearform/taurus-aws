@@ -1,3 +1,3 @@
-# Helm charts installation
+# Helm Charts Installation
 
 ## [Guide](../docs/helm/README.md)

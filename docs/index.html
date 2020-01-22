@@ -103,9 +103,11 @@
       window.$docsify = {
         name: '<img src=img/Accel_Logo_Taurus.svg style="height:1.5em; margin-top: 1em" />',
         repo: 'https://github.com/nearform/taurus',
-        loadSidebar: '_sidebar',
-        auto2top: true,
-        subMaxLevel: 2
+        loadSidebar: true,
+        alias: {
+          '/*/_sidebar.md': '/_sidebar.md'
+        },
+        auto2top: true
       }
 
       var open = false;
