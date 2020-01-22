@@ -120,7 +120,7 @@ For more information on adding users, refer to [Managing Users or IAM Roles for 
 [Install Kubernetes Add-Ons]:/helm/
 
 <!-- External Links -->
-[aws-cli-install]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.htmlgit checkout master
+[aws-cli-install]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
 [aws-iam-authenticator-install]: https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
 [kubectl-install]: https://kubernetes.io/docs/tasks/tools/install-kubectl
 [helm-install]: https://github.com/helm/helm/releases/tag/v2.9.0
