@@ -1,8 +1,16 @@
-# Helm charts installation
+# Install Kubernetes Add-Ons 
 
-## Helm v2 setup
+Use Helm to install Kubernetes add-ons. Helm, the package manager for Kubernetes, is a useful tool to install, upgrade and manage applications on a Kubernetes cluster. Helm packages are called charts. 
 
-### Setup Tiller RBAC
+Helm consists of a client (helm) and a server (Tiller). Tiller runs inside your Kubernetes cluster as a pod in the kube-system namespace. Tiller manages both the releases (installations) and revisions (versions) of charts deployed on the cluster. When you run Helm commands, your local Helm client sends instructions to the Tiller in the cluster that then makes the requested changes.
+
+## Configure Helm 
+
+### 1. Configure Helm Tiller Role-Based Access Control(RBAC)
+To create a new Helm service account (tiller) and limit Tiller access to the Tiller namespace (kube-system) within the cluster, you need to configure Tiller RBAC.
+
+Edit the file `helm/helm-rbac.yaml` so that it contains the following configuration:
+
 ```yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -23,17 +31,25 @@ subjects:
     name: tiller
     namespace: kube-system
 ```
+Apply the configuration using the following command:
 ```sh
 kubectl apply -f helm/helm-rbac.yaml
 ```
 
-### Install Tiller
+### 2. Install Tiller
 
+Install Tiller to manage the cluster Helm charts using the command:
 ```sh
 helm init --service-account tiller --tiller-namespace kube-system
 ```
 
-## kube2iam
+You can verify that you have the correct version and that it installed properly using the command: 
+```sh
+helm version
+```
+
+## Install kube2iam
+Install kube2iam using the following command:
 ```sh
 helm upgrade --install "kube2iam" "stable/kube2iam" --version "2.0.1" --namespace "kube-system" \
 --set rbac.create="true" \
@@ -41,11 +57,12 @@ helm upgrade --install "kube2iam" "stable/kube2iam" --version "2.0.1" --namespac
 --set host.iptables="true"
 ```
 
-## fluentd-cloudwatch
+## Install Fluentd CloudWatch
+Add the Helm incubator charts repository for your local client using the following command:
 ```sh
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 ```
-
+Install FluentD CloudWatch to the namespace 'kube-system' using the following command:
 ```sh
 helm upgrade --install "fluentd-cloudwatch" "incubator/fluentd-cloudwatch" --version "0.10.2" --namespace "kube-system" \
 --set rbac.create="true" \
@@ -55,13 +72,16 @@ helm upgrade --install "fluentd-cloudwatch" "incubator/fluentd-cloudwatch" --ver
 --set extraVars[0]="\{ name: FLUENT_UID\, value: '0' \}"
 ```
 
-## metrics-server
+## Install Metrics Server
+Use the following command to install metrics server:
 ```sh
 helm upgrade --install "metrics-server" "stable/metrics-server" --version "2.8.5" --namespace "kube-system" \
 --set replicas="2"
 ```
 
-## cluster-autoscaler
+## Install Cluster Autoscaler
+Use the following command to install and configure the cluster autoscaler:
+
 ```sh
 helm upgrade --install "cluster-autoscaler" "stable/cluster-autoscaler" --version "3.2.0" --namespace "kube-system" \
 --set rbac.create="true" \
@@ -74,11 +94,12 @@ helm upgrade --install "cluster-autoscaler" "stable/cluster-autoscaler" --versio
 --set podAnnotations.iam\\.amazonaws\\.com/role="${CLUSTER_AUTOSCALER_IAM_ROLE_ARN}"
 ```
 
-## alb-ingress-controller
+## Install Application Load Balancer
+The Application Load Balancer (ALB) is alb-ingress-controller. Use the following command to add to the repository:
 ```sh
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 ```
-
+Install and configure the ALB using the command:
 ```sh
 helm upgrade --install "aws-alb-ingress-controller" "incubator/aws-alb-ingress-controller" --version "0.1.10" --namespace "kube-system" \
 --set clusterName="${EKS_CLUSTER_NAME}" \
@@ -87,7 +108,8 @@ helm upgrade --install "aws-alb-ingress-controller" "incubator/aws-alb-ingress-c
 --set podAnnotations.iam\\.amazonaws\\.com/role="${ALB_INGRESS_CONTROLLER_IAM_ROLE_ARN}"
 ```
 
-## external-dns
+## Install ExternalDNS
+Use the following command to install and configure ExternalDNS:
 ```sh
 helm upgrade --install "external-dns" "stable/external-dns" --version "2.6.1" --namespace "kube-system" \
 --set rbac.create="true" \
