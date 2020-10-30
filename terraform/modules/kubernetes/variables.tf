@@ -11,7 +11,7 @@ variable "eks_worker_node_max_size" {
 variable "eks_worker_ami_id" {}
 variable "eks_worker_instance_type" {}
 variable "eks_map_users" {
-  type    = "list"
+  type    = list
   default = []
 }
 variable "tags" {

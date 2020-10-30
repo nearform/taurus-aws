@@ -13,11 +13,7 @@ Install the following Taurus dependencies using the instructions in each provide
 1. [aws-iam-authenticator][aws-iam-authenticator-install]
 1. [kubectl][kubectl-install]
 1. [Helm][helm-install] 
-    
-    After installing Helm, run the command: 
-    
-    `helm init --client-only`
-1. [Terraform][terraform-install]. Use version 0.12.8 or higher.
+1. [Terraform][terraform-install]. Use version 0.13.5 or higher.
 
 ## Clone the Source Repository
 To start, fork [Taurus] on GitHub. It is easier to maintain your own fork as Taurus is designed to diverge. It is unlikely you will need to pull from the source repository again.

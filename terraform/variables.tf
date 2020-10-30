@@ -6,6 +6,5 @@ variable "rds_instance_class" {}
 variable "rds_allocated_storage" {}
 variable "rds_db_name" {}
 variable "rds_username" {}
-variable "rds_password" {}
 variable "route53_hosted_zone" {}
 variable "static_website_domain_name" {}

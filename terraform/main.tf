@@ -1,9 +1,3 @@
-terraform {
-  required_version = ">= 0.12.8"
-
-  backend "s3" {}
-}
-
 module "networking" {
   source = "./modules/networking"
 
@@ -30,7 +24,6 @@ module "database" {
   rds_allocated_storage      = var.rds_allocated_storage
   rds_db_name                = var.rds_db_name
   rds_username               = var.rds_username
-  rds_password               = var.rds_password
   rds_vpc_id                 = module.networking.vpc_id
   rds_vpc_security_group_ids = [module.networking.vpc_default_security_group_id, module.kubernetes.eks_worker_security_group_id]
   rds_vpc_database_subnets   = module.networking.vpc_database_subnets
@@ -40,8 +33,8 @@ module "static_website" {
   source = "./modules/static-website"
 
   providers = {
-    aws           = "aws"
-    aws.us_east_1 = "aws.us_east_1"
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
   }
 
   route53_hosted_zone = var.route53_hosted_zone

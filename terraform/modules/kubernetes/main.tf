@@ -1,13 +1,28 @@
+data "aws_eks_cluster" "eks" {
+  name = module.eks.cluster_id
+}
+
+data "aws_eks_cluster_auth" "eks" {
+  name = module.eks.cluster_id
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.eks.token
+  load_config_file       = false
+  version                = "~> 1.9"
+}
+
 module "eks" {
   source                    = "terraform-aws-modules/eks/aws"
-  version                   = "5.1.0"
+  version                   = "13.0.0"
   cluster_name              = var.eks_cluster_name
   vpc_id                    = var.eks_vpc_id
   subnets                   = var.eks_vpc_private_subnets
   cluster_version           = var.eks_cluster_version
   cluster_enabled_log_types = [] # https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
   config_output_path        = "${path.root}/"
-  write_aws_auth_config     = false
   write_kubeconfig          = false
 
   worker_groups = [
